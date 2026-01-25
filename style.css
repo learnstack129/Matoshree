@@ -11,21 +11,25 @@
     --primary-red: #b11d21;    /* Deep red from the stage backdrop */
     --accent-gold: #d4af37;    /* Gold from the floral highlights */
     --warm-cream: #fdf5e6;     /* Cream tone from the seating */
+    --nav-height: 80px;        /* Defined height to separate from hero */
     --transition: all 0.3s ease;
 }
 
-/* Navigation */
+/* Navigation - Now separated with a solid background */
 nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 10%;
-    background: rgba(255, 255, 255, 0.95);
+    padding: 0 10%;
+    height: var(--nav-height); /* Fixed height for clean separation */
+    background: #ffffff;      /* Solid white background */
     position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
     z-index: 1000;
-    border-bottom: 3px solid var(--accent-gold);
-    transition: var(--transition);
+    border-bottom: 3px solid var(--accent-gold); /* Gold border from photo accents */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);      /* Added shadow for depth */
 }
 
 .logo {
@@ -51,10 +55,12 @@ nav ul li a:hover {
     color: var(--primary-red);
 }
 
-/* Hero Section */
+/* Hero Section - Background starts AFTER the navbar */
 .hero {
-    min-height: 100vh;
-    /* Red-tinted overlay to harmonize with the photo colors */
+    /* min-height calculation accounts for the navbar height */
+    min-height: calc(100vh - var(--nav-height)); 
+    margin-top: var(--nav-height); /* Pushes the image down below the nav */
+    
     background: linear-gradient(rgba(177, 29, 33, 0.35), rgba(0, 0, 0, 0.65)), 
                 url('./images/back.jpeg'); 
     
@@ -69,7 +75,7 @@ nav ul li a:hover {
     align-items: center;
     text-align: center;
     color: white;
-    padding: 100px 20px;
+    padding: 40px 20px;
 }
 
 .hero-content h1 {
@@ -85,7 +91,7 @@ nav ul li a:hover {
     max-width: 700px;
 }
 
-/* Button with gold and red accents */
+/* Button style maintained from photo palette */
 .btn {
     padding: 14px 35px;
     background: var(--accent-gold);
@@ -108,40 +114,22 @@ nav ul li a:hover {
 
 /* --- Responsive Media Queries --- */
 
-/* Tablets and Mobile Devices */
 @media (max-width: 768px) {
     nav {
-        padding: 15px 5%;
+        padding: 0 5%;
     }
 
     nav ul {
-        display: none; /* Recommended: implement a toggle menu in script.js */
+        display: none; 
     }
 
     .hero {
-        /* Forces the image to be vertically full (100% height) */
-        /* 'auto' maintains aspect ratio to prevent stretching the stage decor */
+        /* Mobile adjustment: image is vertically full */
         background-size: auto 100%; 
-        
-        /* Centers horizontally to keep the sofa and heart-shape in view */
         background-position: center center; 
-        
-        /* Fixed attachment is disabled for smoother mobile scrolling */
         background-attachment: scroll; 
-        
-        /* Dark background color to fill any horizontal gaps on wide mobile screens */
         background-color: #000;
-    }
-}
-
-/* Small Mobile Devices */
-@media (max-width: 480px) {
-    .hero {
-        padding: 80px 15px;
-    }
-    
-    .btn {
-        width: 100%;
-        padding: 12px;
+        /* Adjust height for mobile nav */
+        min-height: calc(100vh - var(--nav-height));
     }
 }

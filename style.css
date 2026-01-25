@@ -10,7 +10,7 @@
 :root {
     --primary-red: #b11d21;    /* Deep red from the stage backdrop */
     --accent-gold: #d4af37;    /* Gold from the floral highlights */
-    --warm-cream: #fdf5e6;     
+    --warm-cream: #fdf5e6;     /* Cream tone from the seating */
     --transition: all 0.3s ease;
 }
 
@@ -44,18 +44,24 @@ nav ul li a {
     color: #333;
     margin-left: 30px;
     font-weight: 600;
+    transition: var(--transition);
 }
 
-/* Hero Section - Mobile Adjusted */
+nav ul li a:hover {
+    color: var(--primary-red);
+}
+
+/* Hero Section */
 .hero {
-    min-height: 100vh; /* Changed from height to min-height for mobile content scaling */
+    min-height: 100vh;
+    /* Red-tinted overlay to harmonize with the photo colors */
     background: linear-gradient(rgba(177, 29, 33, 0.35), rgba(0, 0, 0, 0.65)), 
                 url('./images/back.jpeg'); 
     
     background-size: cover; 
     background-position: center; 
-    /* Parallax effect (fixed attachment) is often disabled on mobile for better performance */
     background-attachment: fixed;
+    background-repeat: no-repeat;
     
     display: flex;
     flex-direction: column;
@@ -63,11 +69,11 @@ nav ul li a {
     align-items: center;
     text-align: center;
     color: white;
-    padding: 80px 20px; /* Added padding for mobile header clearance */
+    padding: 100px 20px;
 }
 
 .hero-content h1 {
-    font-size: clamp(2rem, 8vw, 3.5rem); /* Responsive font sizing */
+    font-size: clamp(2.2rem, 8vw, 3.5rem);
     margin-bottom: 1rem;
     text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
     font-family: 'Georgia', serif;
@@ -75,10 +81,11 @@ nav ul li a {
 
 .hero-content p {
     font-size: clamp(1rem, 4vw, 1.3rem);
-    margin-bottom: 2rem;
-    max-width: 600px;
+    margin-bottom: 2.5rem;
+    max-width: 700px;
 }
 
+/* Button with gold and red accents */
 .btn {
     padding: 14px 35px;
     background: var(--accent-gold);
@@ -87,6 +94,7 @@ nav ul li a {
     font-size: 1.1rem;
     font-weight: 600;
     text-transform: uppercase;
+    letter-spacing: 1px;
     cursor: pointer;
     border-radius: 4px;
     transition: var(--transition);
@@ -107,29 +115,33 @@ nav ul li a {
     }
 
     nav ul {
-        display: none; /* In a real project, replace this with a hamburger menu */
+        display: none; /* Recommended: implement a toggle menu in script.js */
     }
 
     .hero {
-        /* On mobile, fixed backgrounds can cause lag/zooming issues */
+        /* Forces the image to be vertically full (100% height) */
+        /* 'auto' maintains aspect ratio to prevent stretching the stage decor */
+        background-size: auto 100%; 
+        
+        /* Centers horizontally to keep the sofa and heart-shape in view */
+        background-position: center center; 
+        
+        /* Fixed attachment is disabled for smoother mobile scrolling */
         background-attachment: scroll; 
-        /* Focuses the image on the central seating area for portrait screens */
-        background-position: 65% center;
-    }
-
-    .hero-content h1 {
-        line-height: 1.2;
+        
+        /* Dark background color to fill any horizontal gaps on wide mobile screens */
+        background-color: #000;
     }
 }
 
 /* Small Mobile Devices */
 @media (max-width: 480px) {
     .hero {
-        padding: 60px 15px;
+        padding: 80px 15px;
     }
     
     .btn {
-        width: 100%; /* Full width button on very small screens */
+        width: 100%;
         padding: 12px;
     }
 }

@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Matoshree Mangal Karyalay</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
-
 <body>
+    <canvas id="three-canvas"></canvas>
+
     <header>
         <nav>
             <div class="logo">Matoshree</div>
@@ -32,9 +33,36 @@
             <p>Premium Venue for Weddings, Engagements, and Events</p>
             <button class="btn">Book Now</button>
         </div>
+        <a href="#about" class="scroll-down">
+            <div class="mouse"></div>
+        </a>
     </section>
 
+    <section id="about" class="about-section">
+        <div class="about-container">
+            <div class="about-text animate-on-scroll">
+                <h2>About Matoshree</h2>
+                <div class="divider"></div>
+                <p>Welcome to Matoshree Mangal Karyalay, where your dreams meet elegance. We specialize in providing a majestic atmosphere for your most cherished celebrations.</p>
+                <p>From traditional weddings to modern corporate events, our venue offers a perfect blend of sophisticated decor and premium amenities to make every moment unforgettable.</p>
+            </div>
+            <div class="about-features animate-on-scroll">
+                <div class="feature-card">
+                    <h3>Grand Hall</h3>
+                    <p>Our spacious, well-ventilated grand hall is designed to comfortably accommodate 1300+ guests.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Dining Hall</h3>
+                    <p>Enjoy a premium dining experience in our dedicated hall with a capacity of 350+ guests at a time.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Grand Decor</h3>
+                    <p>Experience the beauty of our floral stage designs and ambient lighting inspired by traditional elegance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
     <script src="script.js"></script>
 </body>
-
 </html>

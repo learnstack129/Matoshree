@@ -85,10 +85,24 @@ nav ul li a:hover {
     font-family: 'Georgia', serif;
 }
 
+/* Targeted styling for the hero description statement */
+/* Targeted styling to center and enhance the description statement */
 .hero-content p {
+    /* Horizontal Centering */
+    text-align: center; 
+    margin: 0 auto 2.5rem auto; /* Centers the block and maintains bottom spacing */
+    width: 100%;
+    max-width: 700px; /* Limits width to keep text over the darker center of the photo */
+
+    /* Visibility Improvements */
+    color: #ffffff; 
     font-size: clamp(1rem, 4vw, 1.3rem);
-    margin-bottom: 2.5rem;
-    max-width: 700px;
+    font-weight: 500;
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+
+    /* High-contrast shadow to separate white text from the floral background */
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 0, 0, 0.6); 
 }
 
 /* Button style maintained from photo palette */

@@ -55,6 +55,21 @@ nav ul li a:hover {
     color: var(--primary-red);
 }
 
+/* Mobile Menu Toggle Styling */
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+.bar {
+    height: 3px;
+    width: 25px;
+    background-color: var(--primary-red);
+    margin: 3px 0;
+    transition: 0.4s;
+}
+
 /* Hero Section - Background starts AFTER the navbar */
 .hero {
     /* min-height calculation accounts for the navbar height */
@@ -145,5 +160,30 @@ nav ul li a:hover {
         background-color: #000;
         /* Adjust height for mobile nav */
         min-height: calc(100vh - var(--nav-height));
+    }
+
+    .menu-toggle {
+        display: flex; /* Show toggle on mobile */
+    }
+
+    .nav-links {
+        display: none; /* Hide links by default */
+        flex-direction: column;
+        position: absolute;
+        top: var(--nav-height);
+        left: 0;
+        width: 100%;
+        background-color: #fff;
+        border-bottom: 3px solid var(--accent-gold);
+        text-align: center;
+    }
+
+    /* Class to show menu via JavaScript */
+    .nav-links.active {
+        display: flex;
+    }
+
+    .nav-links li {
+        margin: 15px 0;
     }
 }

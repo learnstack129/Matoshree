@@ -9,9 +9,9 @@
 
 :root {
     --primary-red: #b11d21;    /* Deep red from the stage backdrop */
-    --accent-gold: #d4af37;    /* Gold from the floral highlights and sofa trim */
-    --warm-cream: #fdf5e6;     /* Cream tone from the seating */
-    --dark-overlay: rgba(0, 0, 0, 0.5);
+    --accent-gold: #d4af37;    /* Gold from the floral highlights */
+    --warm-cream: #fdf5e6;     
+    --transition: all 0.3s ease;
 }
 
 /* Navigation */
@@ -24,15 +24,14 @@ nav {
     position: fixed;
     width: 100%;
     z-index: 1000;
-    transition: 0.4s;
-    border-bottom: 3px solid var(--accent-gold); /* Added gold accent to match the photo */
+    border-bottom: 3px solid var(--accent-gold);
+    transition: var(--transition);
 }
 
 .logo {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--primary-red);
-    letter-spacing: 1px;
 }
 
 nav ul {
@@ -45,22 +44,17 @@ nav ul li a {
     color: #333;
     margin-left: 30px;
     font-weight: 600;
-    transition: 0.3s;
 }
 
-nav ul li a:hover {
-    color: var(--primary-red);
-}
-
-/* Hero Section */
+/* Hero Section - Mobile Adjusted */
 .hero {
-    height: 100vh;
-    /* Updated gradient to a warmer red-tinted overlay for better blending */
+    min-height: 100vh; /* Changed from height to min-height for mobile content scaling */
     background: linear-gradient(rgba(177, 29, 33, 0.35), rgba(0, 0, 0, 0.65)), 
-                url('./images/back.jpg'); 
+                url('./images/back.jpeg'); 
     
     background-size: cover; 
     background-position: center; 
+    /* Parallax effect (fixed attachment) is often disabled on mobile for better performance */
     background-attachment: fixed;
     
     display: flex;
@@ -69,24 +63,22 @@ nav ul li a:hover {
     align-items: center;
     text-align: center;
     color: white;
-    padding: 0 20px;
+    padding: 80px 20px; /* Added padding for mobile header clearance */
 }
 
 .hero-content h1 {
-    font-size: 3.5rem;
+    font-size: clamp(2rem, 8vw, 3.5rem); /* Responsive font sizing */
     margin-bottom: 1rem;
     text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
-    font-family: 'Georgia', serif; /* More elegant font to match the venue style */
+    font-family: 'Georgia', serif;
 }
 
 .hero-content p {
-    font-size: 1.3rem;
-    margin-bottom: 2.5rem;
-    font-weight: 300;
-    letter-spacing: 0.5px;
+    font-size: clamp(1rem, 4vw, 1.3rem);
+    margin-bottom: 2rem;
+    max-width: 600px;
 }
 
-/* Button - Updated to Gold Palette */
 .btn {
     padding: 14px 35px;
     background: var(--accent-gold);
@@ -95,36 +87,49 @@ nav ul li a:hover {
     font-size: 1.1rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 1px;
     cursor: pointer;
     border-radius: 4px;
-    transition: all 0.3s ease;
+    transition: var(--transition);
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
 .btn:hover {
     background: var(--primary-red);
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
 }
 
-/* Section Spacing (for About, Gallery, etc.) */
-section {
-    padding: 80px 10%;
-    text-align: center;
-}
+/* --- Responsive Media Queries --- */
 
-/* Responsive Design */
+/* Tablets and Mobile Devices */
 @media (max-width: 768px) {
-    .hero-content h1 {
-        font-size: 2.5rem;
-    }
-    
     nav {
         padding: 15px 5%;
     }
-    
+
     nav ul {
-        display: none; /* Consider adding a mobile menu icon in script.js */
+        display: none; /* In a real project, replace this with a hamburger menu */
+    }
+
+    .hero {
+        /* On mobile, fixed backgrounds can cause lag/zooming issues */
+        background-attachment: scroll; 
+        /* Focuses the image on the central seating area for portrait screens */
+        background-position: 65% center;
+    }
+
+    .hero-content h1 {
+        line-height: 1.2;
+    }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 480px) {
+    .hero {
+        padding: 60px 15px;
+    }
+    
+    .btn {
+        width: 100%; /* Full width button on very small screens */
+        padding: 12px;
     }
 }

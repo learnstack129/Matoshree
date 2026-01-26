@@ -706,11 +706,11 @@
             <div class="about-features">
                 <div class="feature-card glass-effect">
                     <h3>Grand Hall</h3>
-                    <p>Our spacious, well-ventilated grand hall is designed to comfortably accommodate 1300+ guests.</p>
+                    <p>Our spacious, well-ventilated grand hall is designed to comfortably accommodate 1400+ guests.</p>
                 </div>
                 <div class="feature-card glass-effect">
                     <h3>Dining Hall</h3>
-                    <p>Enjoy a premium dining experience in our dedicated hall with a capacity of 350+ guests at a time.
+                    <p>Enjoy a premium dining experience in our dedicated hall with a capacity of 250+ guests at a time.
                     </p>
                 </div>
                 <div class="feature-card glass-effect">
@@ -772,7 +772,7 @@
 
                 <div class="info-item">
                     <h3>Contact Details</h3>
-                    <p>Mobile: +91 9423525111 / +91 8928045111</p>
+                    <p>Mobile: +91 8928045111 || +91 9423525111</p>
                 </div>
 
                 <div class="contact-actions">
@@ -844,11 +844,11 @@
                 item.onclick = () => openLightbox(data.url, data.type); // ZOOM TRIGGER
 
                 if (data.type === 'image') {
-                    item.innerHTML = `<img src="${data.url}" alt="Gallery Image" loading="lazy">`;
+                    item.innerHTML = `<img src="${data.url}" alt="Gallery Image" loading="lazy" style="cursor : pointer">`;
                 } else {
                     // Added playsinline and #t=0.001 to prevent black screens on load
                     item.innerHTML = `
-            <video muted playsinline preload="metadata">
+            <video muted playsinline preload="metadata" style="cursor : pointer">
                 <source src="${data.url}#t=0.001" type="video/mp4">
             </video>`;
 
@@ -952,19 +952,6 @@
         let currentScrollY = window.scrollY;
         let scrollDelta = 0;
 
-        window.addEventListener('scroll', () => {
-            const newScrollY = window.scrollY;
-            scrollDelta = newScrollY - currentScrollY; // How much we just moved
-            currentScrollY = newScrollY;
-
-            // Throttled emission
-            const now = Date.now();
-            if (now - lastScrollTime > 50) {
-                emitParticle(lastMouseX, lastMouseY, 0.1);
-                lastScrollTime = now;
-            }
-        });
-
         // --- UNIFIED RICH HEADER ANIMATION ---
         gsap.registerPlugin(ScrollTrigger);
 
@@ -1013,13 +1000,7 @@
         let lastMouseX = window.innerWidth / 2;
         let lastMouseY = window.innerHeight / 2;
 
-        // Update your existing updateMouse to save these coordinates
-        function updateMouse(e) {
-            lastMouseX = e.touches ? e.touches[0].clientX : e.clientX;
-            lastMouseY = e.touches ? e.touches[0].clientY : e.clientY;
-
-            emitParticle(lastMouseX, lastMouseY);
-        }
+        
 
         // 3. Three.js High-Quality OM Particle System
         const canvas = document.querySelector('#three-canvas');
@@ -1055,7 +1036,7 @@
 
         // Particle System Variables
         // Particle System Variables
-        const particleCount = 300; // Increased from 70 to 300 for a dense effect
+        const particleCount = 100; // Increased from 70 to 300 for a dense effect
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(particleCount * 3);
         const alphas = new Float32Array(particleCount);
@@ -1119,62 +1100,35 @@
         let currentIdx = 0;
         const mousePos = new THREE.Vector3();
 
-        function updateMouse(e) {
-            const isMobile = window.innerWidth <= 768;
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-            const x = (clientX / window.innerWidth) * 2 - 1;
-            const y = -(clientY / window.innerHeight) * 2 + 1;
-
-            const vector = new THREE.Vector3(x, y, 0.5);
-            vector.unproject(camera);
-            const dir = vector.sub(camera.position).normalize();
-            const distance = -camera.position.z / dir.z;
-            const pos = camera.position.clone().add(dir.multiplyScalar(distance));
-
-            // Mobile gets 2 particles for visibility; Laptop gets 1 for elegance
-            const spawnCount = 1;
-
-            for (let j = 0; j < spawnCount; j++) {
-                positions[currentIdx * 3] = pos.x + (Math.random() - 0.5) * 0.05;
-                positions[currentIdx * 3 + 1] = pos.y + (Math.random() - 0.5) * 0.05;
-                positions[currentIdx * 3 + 2] = pos.z;
-                alphas[currentIdx] = 1.0;
-                currentIdx = (currentIdx + 1) % particleCount;
-            }
-        }
-
-        window.addEventListener('mousemove', updateMouse);
-        window.addEventListener('touchmove', (e) => updateMouse(e.touches[0]));
+        
 
         function animate() {
-    requestAnimationFrame(animate);
+            requestAnimationFrame(animate);
 
-    const posAttr = geometry.attributes.position;
-    const alphaAttr = geometry.attributes.alpha;
+            const posAttr = geometry.attributes.position;
+            const alphaAttr = geometry.attributes.alpha;
 
-    for (let i = 0; i < particleCount; i++) {
-        // 1. Constant upward drift
-        posAttr.array[i * 3 + 1] += 0.003; 
+            for (let i = 0; i < particleCount; i++) {
+                // 1. Constant upward drift
+                posAttr.array[i * 3 + 1] += 0.003;
 
-        // 2. Gentle horizontal sway
-        posAttr.array[i * 3] += Math.sin(Date.now() * 0.001 + i) * 0.001;
+                // 2. Gentle horizontal sway
+                posAttr.array[i * 3] += Math.sin(Date.now() * 0.001 + i) * 0.001;
 
-        // 3. Wrap-around logic: If it goes off top, move to bottom
-        if (posAttr.array[i * 3 + 1] > 5) {
-            posAttr.array[i * 3 + 1] = -5;
-            posAttr.array[i * 3] = (Math.random() - 0.5) * 10;
+                // 3. Wrap-around logic: If it goes off top, move to bottom
+                if (posAttr.array[i * 3 + 1] > 5) {
+                    posAttr.array[i * 3 + 1] = -5;
+                    posAttr.array[i * 3] = (Math.random() - 0.5) * 10;
+                }
+
+                // 4. Subtle pulse effect for 'rich' feel
+                alphaAttr.array[i] = 0.3 + Math.abs(Math.sin(Date.now() * 0.001 + i)) * 0.3;
+            }
+
+            posAttr.needsUpdate = true;
+            alphaAttr.needsUpdate = true;
+            renderer.render(scene, camera);
         }
-
-        // 4. Subtle pulse effect for 'rich' feel
-        alphaAttr.array[i] = 0.3 + Math.abs(Math.sin(Date.now() * 0.001 + i)) * 0.3;
-    }
-
-    posAttr.needsUpdate = true;
-    alphaAttr.needsUpdate = true;
-    renderer.render(scene, camera);
-}
 
         animate();
 
@@ -1183,38 +1137,7 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-        // 1. Add a throttle variable at the top of your script
-        let lastScrollTime = 0;
-
-        // 2. Updated emitParticle with "Central Gravity" logic
-        function emitParticle(xPos, yPos, spread = 0.05) {
-            const isMobile = window.innerWidth <= 768;
-
-            // Normalize coordinates for Three.js
-            const x = (xPos / window.innerWidth) * 2 - 1;
-            const y = -(yPos / window.innerHeight) * 2 + 1;
-
-            // Hard check: If it's dead-center, lower the spawnCount
-            const dist = Math.sqrt(x * x + y * y);
-            let finalSpawnCount = isMobile ? 1 : 1;
-
-            // If it's too close to center (dist < 0.3), skip occasionally
-            if (dist < 0.3 && Math.random() > 0.3) return;
-
-            const vector = new THREE.Vector3(x, y, 0.5);
-            vector.unproject(camera);
-            const dir = vector.sub(camera.position).normalize();
-            const distance = -camera.position.z / dir.z;
-            const pos = camera.position.clone().add(dir.multiplyScalar(distance));
-
-            for (let j = 0; j < finalSpawnCount; j++) {
-                positions[currentIdx * 3] = pos.x + (Math.random() - 0.5) * spread;
-                positions[currentIdx * 3 + 1] = pos.y + (Math.random() - 0.5) * spread;
-                positions[currentIdx * 3 + 2] = pos.z;
-                alphas[currentIdx] = 1.0;
-                currentIdx = (currentIdx + 1) % particleCount;
-            }
-        }
+        
 
         // index.html script addition
         const adminTrigger = document.getElementById('adminTrigger');

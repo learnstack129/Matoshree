@@ -400,6 +400,17 @@
         gsap.to('.about-text p', { scrollTrigger: { trigger: '.about-text p', start: 'top 80%' }, opacity: 1, x: 0, duration: 0.8, stagger: 0.2 });
         gsap.to('.feature-card', { scrollTrigger: { trigger: '.feature-card', start: 'top 80%' }, opacity: 1, x: 0, duration: 0.8, stagger: 0.2 });
 
+        let lastMouseX = window.innerWidth / 2;
+        let lastMouseY = window.innerHeight / 2;
+
+        // Update your existing updateMouse to save these coordinates
+        function updateMouse(e) {
+            lastMouseX = e.touches ? e.touches[0].clientX : e.clientX;
+            lastMouseY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            emitParticle(lastMouseX, lastMouseY);
+        }
+
         // 3. Three.js High-Quality OM Particle System
         const canvas = document.querySelector('#three-canvas');
         const scene = new THREE.Scene();
@@ -540,6 +551,9 @@
 
                     // SLIGHT SWAY
                     posAttr.array[i * 3] += Math.sin(Date.now() * 0.001 + i) * 0.003;
+
+                    posAttr.array[i * 3] += Math.sin(Date.now() * 0.002 + i) * 0.005; // Sway
+                    posAttr.array[i * 3 + 1] += 0.008; // Consistent upward drift
                 }
             }
 
@@ -555,6 +569,51 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            // 1. Emit at mouse position
+            emitParticle(lastMouseX, lastMouseY, 0.1);
+
+            // 2. Creative Touch: Emit a few random "ambient" particles 
+            // across the center-width of the screen during scroll
+            const randomX = (window.innerWidth * 0.2) + (Math.random() * window.innerWidth * 0.6);
+            const randomY = (window.innerHeight * 0.4) + (Math.random() * window.innerHeight * 0.2);
+
+            // Only emit ambient ones occasionally to keep it elegant
+            if (Math.random() > 0.7) {
+                emitParticle(randomX, randomY, 0.5);
+            }
+        });
+
+        // Helper function to handle the math (Refactored from your updateMouse)
+        function emitParticle(xPos, yPos, spread = 0.05) {
+            const isMobile = window.innerWidth <= 768;
+
+            const x = (xPos / window.innerWidth) * 2 - 1;
+            const y = -(yPos / window.innerHeight) * 2 + 1;
+
+            const vector = new THREE.Vector3(x, y, 0.5);
+            vector.unproject(camera);
+            const dir = vector.sub(camera.position).normalize();
+            const distance = -camera.position.z / dir.z;
+            const pos = camera.position.clone().add(dir.multiplyScalar(distance));
+
+            // Increase spawn count on scroll for a "trail" effect
+            const spawnCount = isMobile ? 3 : 2;
+
+            for (let j = 0; j < spawnCount; j++) {
+                // Creative Spread: Particles emerge in a slight circle/spiral
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * spread;
+
+                positions[currentIdx * 3] = pos.x + Math.cos(angle) * radius;
+                positions[currentIdx * 3 + 1] = pos.y + Math.sin(angle) * radius;
+                positions[currentIdx * 3 + 2] = pos.z;
+
+                alphas[currentIdx] = 1.0;
+                currentIdx = (currentIdx + 1) % particleCount;
+            }
+        }
     </script>
 </body>
 

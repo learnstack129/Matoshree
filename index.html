@@ -643,7 +643,16 @@
 
             .hero {
                 background-attachment: scroll;
-                background-position: 65% center;
+                /* Required for mobile compatibility */
+                background-position: center center;
+                /* Centers the image horizontally and vertically */
+                background-size: cover;
+                /* Ensures the image fills the vertical space */
+                min-height: 100vh;
+                /* Keeps it full screen height */
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
 
             .contact-container {
@@ -1152,3 +1161,4 @@
 </body>
 
 </html>
+

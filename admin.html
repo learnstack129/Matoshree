@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | Matoshree Mangal Karyalay</title>
+    <style>
+        :root {
+            --primary-red: #b11d21;
+            --accent-gold: #d4af37;
+            --warm-cream: #fdf5e6;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('./images/back.jpeg');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .login-card,
+        .admin-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            border-top: 5px solid var(--accent-gold);
+        }
+
+        .login-card h2,
+        .admin-container h2 {
+            color: var(--primary-red);
+            margin-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary-red);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .login-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .logout-btn {
+            background: #444;
+            margin-top: 15px;
+        }
+
+        .upload-section input {
+            margin-bottom: 15px;
+        }
+
+        #statusMessage {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--primary-red);
+        }
+
+        #adminGalleryList .admin-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .admin-item img,
+        .admin-item video {
+            width: 60px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .delete-btn {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: #cc0000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loginSection" class="login-card">
+        <h2>Admin Portal</h2>
+        <p>Matoshree Mangal Karyalay</p>
+        <form id="loginForm">
+            <div class="input-group">
+                <label>Admin Email</label>
+                <input type="email" id="email" placeholder="admin@example.com" required>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" id="loginBtn" class="login-btn">Secure Login</button>
+            <div id="statusMessage"></div>
+        </form>
+        <a href="index.html" style="display:block; margin-top:15px; color:var(--accent-gold); text-decoration:none;">←
+            Back to Site</a>
+    </div>
+
+    <div id="adminPanel" style="display: none;" class="admin-container">
+        <h2>Admin Dashboard</h2>
+        <p style="margin-bottom: 20px; color: #666;">Manage your gallery media</p>
+
+        <div class="upload-section">
+            <div class="input-group">
+                <label>Select File (Image or Video)</label>
+                <input type="file" id="mediaInput" accept="image/*,video/*">
+            </div>
+
+            <div class="input-group">
+                <label>Category</label>
+                <select id="mediaType">
+                    <option value="image">Image</option>
+                    <option value="video">Video</option>
+                </select>
+            </div>
+
+            <button id="uploadBtn" class="login-btn">Upload to Gallery</button>
+        </div>
+
+        <div class="progress-bar-container"
+            style="width: 100%; background: #eee; margin-top: 15px; border-radius: 5px; overflow: hidden;">
+            <div id="progressBar" style="width: 0%; height: 10px; background: var(--accent-gold); transition: 0.3s;">
+            </div>
+        </div>
+
+        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+        <h3>Manage Existing Gallery</h3>
+        <div id="adminGalleryList" style="display: grid; gap: 15px; margin-top: 20px;">
+        </div>
+
+        <button id="logoutBtn" class="login-btn logout-btn">Sign Out</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Your Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdQPzjDjOaSKbsHOFUPmeRRFhw7Owmy04",
+            authDomain: "matoshree-57bcb.firebaseapp.com",
+            projectId: "matoshree-57bcb",
+            storageBucket: "matoshree-57bcb.firebasestorage.app",
+            messagingSenderId: "1096669398094",
+            appId: "1:1096669398094:web:c57861344c45c8f0e7af1f",
+            measurementId: "G-6N3MNG5HEJ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const storage = getStorage(app);
+        const db = getFirestore(app);
+
+        // Helper: Toggle between Login and Dashboard
+        const toggleUI = (isLoggedIn) => {
+            if (isLoggedIn) {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+            } else {
+                document.getElementById('loginSection').style.display = 'block';
+                document.getElementById('adminPanel').style.display = 'none';
+                document.getElementById('statusMessage').innerText = "";
+            }
+        };
+
+        // 1. Session Listener: Checks if you're already logged in on refresh
+        onAuthStateChanged(auth, (user) => {
+            toggleUI(!!user);
+        });
+
+        // 2. Login Logic
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            const status = document.getElementById('statusMessage');
+            const btn = document.getElementById('loginBtn');
+
+            btn.disabled = true;
+            status.innerText = "Authenticating...";
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+                if (userCredential.user) {
+                    toggleUI(true); // Immediate switch upon success
+                }
+            } catch (error) {
+                btn.disabled = false;
+                status.innerText = "Error: " + error.message;
+                console.error("Login Error:", error.code);
+            }
+        });
+
+        // 3. Logout Logic
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            signOut(auth).then(() => toggleUI(false));
+        });
+
+        // 4. Media Upload Logic
+        async function uploadMedia() {
+            const fileInput = document.getElementById('mediaInput');
+            const file = fileInput.files[0];
+            const type = document.getElementById('mediaType').value;
+            const uploadBtn = document.getElementById('uploadBtn');
+
+            if (!file) return alert("Please select a file first!");
+
+            uploadBtn.disabled = true;
+            uploadBtn.innerText = "Uploading...";
+
+            // Use Timestamp to prevent filename conflicts
+            const storageRef = ref(storage, `gallery/${type}s/${Date.now()}_${file.name}`);
+            const uploadTask = uploadBytesResumable(storageRef, file);
+
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    document.getElementById('progressBar').style.width = progress + '%';
+                },
+                (error) => {
+                    alert("Upload failed: " + error.message);
+                    uploadBtn.disabled = false;
+                    uploadBtn.innerText = "Upload to Gallery";
+                },
+                () => {
+                    getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+                        // Save metadata to Firestore
+                        await addDoc(collection(db, "gallery"), {
+                            url: downloadURL,
+                            type: type,
+                            name: file.name,
+                            createdAt: serverTimestamp()
+                        });
+
+                        alert("Uploaded successfully!");
+                        document.getElementById('progressBar').style.width = '0%';
+                        fileInput.value = "";
+                        uploadBtn.disabled = false;
+                        uploadBtn.innerText = "Upload to Gallery";
+                    });
+                }
+            );
+        }
+
+        document.getElementById('uploadBtn').addEventListener('click', uploadMedia);
+
+        // 2. Load Gallery for Admin to Manage
+        const adminGalleryList = document.getElementById('adminGalleryList');
+
+        onSnapshot(query(collection(db, "gallery"), orderBy("createdAt", "desc")), (snapshot) => {
+            adminGalleryList.innerHTML = '';
+            snapshot.forEach((snapshotDoc) => {
+                const data = snapshotDoc.data();
+                const id = snapshotDoc.id;
+
+                const div = document.createElement('div');
+                div.className = 'admin-item';
+
+                const mediaPreview = data.type === 'image'
+                    ? `<img src="${data.url}">`
+                    : `<video src="${data.url}" style="width:60px; height:40px;"></video>`;
+
+                div.innerHTML = `
+                ${mediaPreview}
+                <span style="font-size:0.8rem; overflow:hidden;">${data.name || 'Unnamed'}</span>
+                <button class="delete-btn" data-id="${id}" data-url="${data.url}">Delete</button>
+            `;
+                adminGalleryList.appendChild(div);
+            });
+        });
+
+        // 3. Delete Functionality
+        adminGalleryList.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('delete-btn')) {
+                const docId = e.target.getAttribute('data-id');
+                const fileUrl = e.target.getAttribute('data-url');
+
+                if (confirm("Are you sure you want to permanently delete this item?")) {
+                    try {
+                        // Step A: Delete from Storage
+                        // We extract the storage path from the URL
+                        const storageRef = ref(storage, fileUrl);
+                        await deleteObject(storageRef);
+
+                        // Step B: Delete from Firestore
+                        await deleteDoc(doc(db, "gallery", docId));
+
+                        alert("Deleted successfully from both Storage and Database!");
+                    } catch (error) {
+                        console.error("Delete failed:", error);
+                        alert("Error: " + error.message);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

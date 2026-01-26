@@ -382,7 +382,9 @@ function createOmTexture() {
     ctx.shadowBlur = 15;
     ctx.fillText('ॐ', size / 2, size / 2);
     
-    return new THREE.CanvasTexture(canvas);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.flipY = false; // <--- ADD THIS LINE TO FIX THE ORIENTATION
+    return texture;
 }
 
 const omTexture = createOmTexture();
@@ -493,3 +495,4 @@ window.addEventListener('resize', () => {
     </script>
 </body>
 </html>
+

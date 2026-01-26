@@ -388,6 +388,22 @@
             });
         }
 
+        let currentScrollY = window.scrollY;
+        let scrollDelta = 0;
+
+        window.addEventListener('scroll', () => {
+            const newScrollY = window.scrollY;
+            scrollDelta = newScrollY - currentScrollY; // How much we just moved
+            currentScrollY = newScrollY;
+
+            // Throttled emission
+            const now = Date.now();
+            if (now - lastScrollTime > 50) {
+                emitParticle(lastMouseX, lastMouseY, 0.1);
+                lastScrollTime = now;
+            }
+        });
+
         // 2. GSAP ScrollTrigger Animations
         gsap.registerPlugin(ScrollTrigger);
 
@@ -445,11 +461,11 @@
 
         // Particle System Variables
         // Particle System Variables
-        const particleCount = 70; // Slightly increased for a richer feel
-        const geometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(particleCount * 3);
-        const alphas = new Float32Array(particleCount);
-        const sizes = new Float32Array(particleCount);
+        const particleCount = 300; // Increased from 70 to 300 for a dense effect
+const geometry = new THREE.BufferGeometry();
+const positions = new Float32Array(particleCount * 3);
+const alphas = new Float32Array(particleCount);
+const sizes = new Float32Array(particleCount);
 
         const isMobile = window.innerWidth <= 768;
 
@@ -542,20 +558,26 @@
 
             for (let i = 0; i < particleCount; i++) {
                 if (alphaAttr.array[i] > 0) {
-                    // SLOWER FADE: Change 0.015 to 0.008
-                    const fadeSpeed = window.innerWidth <= 768 ? 0.008 : 0.018;
+                    const isMobile = window.innerWidth <= 768;
+                    const fadeSpeed = isMobile ? 0.008 : 0.02;
                     alphaAttr.array[i] -= fadeSpeed;
 
-                    // SLOWER RISE: Change 0.01 to 0.005
+                    // 1. Natural Rise (Spiritual drift)
                     posAttr.array[i * 3 + 1] += 0.005;
 
-                    // SLIGHT SWAY
-                    posAttr.array[i * 3] += Math.sin(Date.now() * 0.001 + i) * 0.003;
+                    // 2. SCROLL LINK: Move upward based on scroll movement
+                    // Multiplying by 0.002 converts pixel scroll to Three.js units
+                    if (scrollDelta !== 0) {
+                        posAttr.array[i * 3 + 1] += Math.abs(scrollDelta) * 0.002;
+                    }
 
-                    posAttr.array[i * 3] += Math.sin(Date.now() * 0.002 + i) * 0.005; // Sway
-                    posAttr.array[i * 3 + 1] += 0.008; // Consistent upward drift
+                    // 3. Gentle Sway
+                    posAttr.array[i * 3] += Math.sin(Date.now() * 0.001 + i) * 0.002;
                 }
             }
+
+            // Reset scrollDelta so it doesn't keep adding when scrolling stops
+            scrollDelta *= 0.9;
 
             posAttr.needsUpdate = true;
             alphaAttr.needsUpdate = true;
@@ -569,28 +591,21 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-        let scrollTimeout;
-        window.addEventListener('scroll', () => {
-            // 1. Emit at mouse position
-            emitParticle(lastMouseX, lastMouseY, 0.1);
+        // 1. Add a throttle variable at the top of your script
+        let lastScrollTime = 0;
 
-            // 2. Creative Touch: Emit a few random "ambient" particles 
-            // across the center-width of the screen during scroll
-            const randomX = (window.innerWidth * 0.2) + (Math.random() * window.innerWidth * 0.6);
-            const randomY = (window.innerHeight * 0.4) + (Math.random() * window.innerHeight * 0.2);
-
-            // Only emit ambient ones occasionally to keep it elegant
-            if (Math.random() > 0.7) {
-                emitParticle(randomX, randomY, 0.5);
-            }
-        });
-
-        // Helper function to handle the math (Refactored from your updateMouse)
+        // 2. Updated emitParticle with "Central Gravity" logic
         function emitParticle(xPos, yPos, spread = 0.05) {
             const isMobile = window.innerWidth <= 768;
 
+            // Convert screen coordinates to Three.js coordinates
             const x = (xPos / window.innerWidth) * 2 - 1;
             const y = -(yPos / window.innerHeight) * 2 + 1;
+
+            // DENSITY CHECK: If mouse is in the dead-center, reduce chance of spawning
+            // This prevents the "cluttered middle" look
+            const distanceFromCenter = Math.sqrt(x * x + y * y);
+            if (distanceFromCenter < 0.3 && Math.random() > 0.4) return;
 
             const vector = new THREE.Vector3(x, y, 0.5);
             vector.unproject(camera);
@@ -598,22 +613,41 @@
             const distance = -camera.position.z / dir.z;
             const pos = camera.position.clone().add(dir.multiplyScalar(distance));
 
-            // Increase spawn count on scroll for a "trail" effect
-            const spawnCount = isMobile ? 3 : 2;
+            // Limit laptop to 1 particle at a time to keep it clean
+            const spawnCount = isMobile ? 2 : 1;
 
             for (let j = 0; j < spawnCount; j++) {
-                // Creative Spread: Particles emerge in a slight circle/spiral
-                const angle = Math.random() * Math.PI * 2;
-                const radius = Math.random() * spread;
-
-                positions[currentIdx * 3] = pos.x + Math.cos(angle) * radius;
-                positions[currentIdx * 3 + 1] = pos.y + Math.sin(angle) * radius;
+                positions[currentIdx * 3] = pos.x + (Math.random() - 0.5) * spread;
+                positions[currentIdx * 3 + 1] = pos.y + (Math.random() - 0.5) * spread;
                 positions[currentIdx * 3 + 2] = pos.z;
-
-                alphas[currentIdx] = 1.0;
+                alphas[currentIdx] = 1.0; // Reset opacity to full
                 currentIdx = (currentIdx + 1) % particleCount;
             }
         }
+
+        // 3. Throttle the Scroll Event
+        window.addEventListener('scroll', () => {
+    const now = Date.now();
+    
+    // Reduce throttle to 30ms (faster spawning)
+    if (now - lastScrollTime > 30) {
+        // Emit 3 particles at the mouse position instead of 1
+        for(let i = 0; i < 3; i++) {
+            emitParticle(lastMouseX, lastMouseY, 0.15);
+        }
+        lastScrollTime = now;
+    }
+
+    // AMBIENT BOOST: Spawn a "burst" of random particles across the screen
+    // This ensures the "whole screen" feels alive with Om symbols
+    if (Math.random() > 0.5) { // Increased frequency
+        const randomX = Math.random() * window.innerWidth;
+        const randomY = Math.random() * window.innerHeight;
+        // Spawn 2 particles at each random location
+        emitParticle(randomX, randomY, 0.4);
+        emitParticle(randomX, randomY, 0.4);
+    }
+});
     </script>
 </body>
 

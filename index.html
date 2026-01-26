@@ -462,10 +462,10 @@
         // Particle System Variables
         // Particle System Variables
         const particleCount = 300; // Increased from 70 to 300 for a dense effect
-const geometry = new THREE.BufferGeometry();
-const positions = new Float32Array(particleCount * 3);
-const alphas = new Float32Array(particleCount);
-const sizes = new Float32Array(particleCount);
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const alphas = new Float32Array(particleCount);
+        const sizes = new Float32Array(particleCount);
 
         const isMobile = window.innerWidth <= 768;
 
@@ -627,27 +627,38 @@ const sizes = new Float32Array(particleCount);
 
         // 3. Throttle the Scroll Event
         window.addEventListener('scroll', () => {
-    const now = Date.now();
-    
-    // Reduce throttle to 30ms (faster spawning)
-    if (now - lastScrollTime > 30) {
-        // Emit 3 particles at the mouse position instead of 1
-        for(let i = 0; i < 3; i++) {
-            emitParticle(lastMouseX, lastMouseY, 0.15);
-        }
-        lastScrollTime = now;
-    }
+            const now = Date.now();
+            const isMobile = window.innerWidth <= 768;
 
-    // AMBIENT BOOST: Spawn a "burst" of random particles across the screen
-    // This ensures the "whole screen" feels alive with Om symbols
-    if (Math.random() > 0.5) { // Increased frequency
-        const randomX = Math.random() * window.innerWidth;
-        const randomY = Math.random() * window.innerHeight;
-        // Spawn 2 particles at each random location
-        emitParticle(randomX, randomY, 0.4);
-        emitParticle(randomX, randomY, 0.4);
-    }
-});
+            // 1. Throttled Scroll Spawning
+            // Mobile: 100ms interval | Laptop: 30ms interval
+            const throttleLimit = isMobile ? 100 : 30;
+
+            if (now - lastScrollTime > throttleLimit) {
+                // Mobile spawns 1 particle; Laptop spawns 3
+                const scrollSpawnCount = isMobile ? 1 : 3;
+
+                for (let i = 0; i < scrollSpawnCount; i++) {
+                    emitParticle(lastMouseX, lastMouseY, 0.15);
+                }
+                lastScrollTime = now;
+            }
+
+            // 2. AMBIENT BOOST (Random screen particles)
+            // Reduce frequency on mobile (10% chance vs 50% chance)
+            const ambientChance = isMobile ? 0.9 : 0.5;
+
+            if (Math.random() > ambientChance) {
+                const randomX = Math.random() * window.innerWidth;
+                const randomY = Math.random() * window.innerHeight;
+
+                // Mobile spawns 1 random particle; Laptop spawns 2
+                const ambientSpawnCount = isMobile ? 1 : 2;
+                for (let i = 0; i < ambientSpawnCount; i++) {
+                    emitParticle(randomX, randomY, 0.4);
+                }
+            }
+        });
     </script>
 </body>
 
